@@ -4,20 +4,34 @@
  */
 package java_swings;
 
+import configs.DbConnection;
 import java.awt.Color;
 import objects.Active_Student;
 import objects.Student;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import objects.Course;
+
 /**
  *
  * @author Maku
  */
 public class Registration_Form extends javax.swing.JFrame {
+    
+    private final DbConnection dbCon = new DbConnection();
 
     public Registration_Form() {
         initComponents();
         getContentPane().setBackground(Color.WHITE);
 
         loadStudentInformations();
+        loadCourses();
         setVisible(true);
     }
     
@@ -34,6 +48,34 @@ public class Registration_Form extends javax.swing.JFrame {
         bdate_field.setText(student.getBirth_date());
     }
 
+    private void loadCourses() {
+        String query = "SELECT * FROM courses";
+        
+        ArrayList<Course> course_list = new ArrayList<>();
+        try (Connection con = dbCon.getConnection();
+             Statement stmt = con.createStatement()){
+            
+            ResultSet rs = stmt.executeQuery(query);
+            while(rs.next()) {
+                String course_code = rs.getString("course_code");
+                String course_name = rs.getString("course_name");
+                String instructor_name = rs.getString("instructor_name");
+                int credits = rs.getInt("credits");
+                int max_capacity = rs.getInt("max_capacity");
+                
+                Course course = new Course(course_code, course_name, instructor_name, credits, max_capacity);
+                course_list.add(course);
+            }
+            
+            for(Course course : course_list) {
+                String course_name = course.getCourse_name();
+                course_comboBox.addItem(course_name);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Registration_Form.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }   
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -55,6 +97,8 @@ public class Registration_Form extends javax.swing.JFrame {
         sex_field = new javax.swing.JLabel();
         lbl6 = new javax.swing.JLabel();
         bdate_field = new javax.swing.JLabel();
+        course_comboBox = new javax.swing.JComboBox<>();
+        register_btn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setBackground(new java.awt.Color(255, 255, 255));
@@ -199,15 +243,23 @@ public class Registration_Form extends javax.swing.JFrame {
                 .addContainerGap(12, Short.MAX_VALUE))
         );
 
+        course_comboBox.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        course_comboBox.setBorder(null);
+        course_comboBox.setFocusable(false);
+
+        register_btn.setBackground(new java.awt.Color(218, 73, 73));
+        register_btn.setForeground(new java.awt.Color(255, 255, 255));
+        register_btn.setText("Register");
+        register_btn.setBorder(null);
+        register_btn.setBorderPainted(false);
+        register_btn.setFocusable(false);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(student_info, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -216,7 +268,15 @@ public class Registration_Form extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addComponent(view_courses, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(student_info, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(course_comboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(register_btn, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -228,7 +288,11 @@ public class Registration_Form extends javax.swing.JFrame {
                 .addComponent(view_courses, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(student_info, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(262, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(course_comboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(register_btn, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(219, Short.MAX_VALUE))
         );
 
         pack();
@@ -239,6 +303,7 @@ public class Registration_Form extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel age_field;
     private javax.swing.JLabel bdate_field;
+    private javax.swing.JComboBox<String> course_comboBox;
     private javax.swing.JLabel fname_field;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lbl;
@@ -250,6 +315,7 @@ public class Registration_Form extends javax.swing.JFrame {
     private javax.swing.JLabel lbl6;
     private javax.swing.JLabel lname_field;
     private javax.swing.JLabel mname_field;
+    private javax.swing.JButton register_btn;
     private javax.swing.JLabel sex_field;
     private javax.swing.JLabel student_field;
     private javax.swing.JPanel student_info;

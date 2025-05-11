@@ -14,7 +14,7 @@ import objects.Student;
 
 public class Login extends javax.swing.JFrame {
 
-    private DbConnection dbConn = new DbConnection();
+    private final DbConnection dbConn = new DbConnection();
     
     public Login() {
         initComponents();
