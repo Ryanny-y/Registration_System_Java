@@ -1,7 +1,21 @@
 
 package java_swings;
+
+import configs.DbConnection;
+import javax.swing.JOptionPane;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import objects.Active_Student;
+import objects.Student;
+
 public class Login extends javax.swing.JFrame {
 
+    private DbConnection dbConn = new DbConnection();
+    
     public Login() {
         initComponents();
         
@@ -16,14 +30,13 @@ public class Login extends javax.swing.JFrame {
         login_Bg1 = new java_swings.Login_Bg();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        id_field = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        last_name_field = new javax.swing.JTextField();
         Login_Btn = new javax.swing.JButton();
         signup_link = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(800, 500));
         setResizable(false);
 
         jLabel1.setFont(new java.awt.Font("Modern No. 20", 1, 36)); // NOI18N
@@ -34,19 +47,19 @@ public class Login extends javax.swing.JFrame {
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("Student Id");
 
-        jTextField1.setBackground(new java.awt.Color(240, 240, 240));
-        jTextField1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jTextField1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 10, 1, 1));
-        jTextField1.setOpaque(true);
+        id_field.setBackground(new java.awt.Color(240, 240, 240));
+        id_field.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        id_field.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 10, 1, 1));
+        id_field.setOpaque(true);
 
         jLabel3.setFont(new java.awt.Font("Modern No. 20", 1, 24)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("Last Name");
 
-        jTextField2.setBackground(new java.awt.Color(240, 240, 240));
-        jTextField2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jTextField2.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 10, 1, 1));
-        jTextField2.setOpaque(true);
+        last_name_field.setBackground(new java.awt.Color(240, 240, 240));
+        last_name_field.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        last_name_field.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 10, 1, 1));
+        last_name_field.setOpaque(true);
 
         Login_Btn.setBackground(new java.awt.Color(218, 73, 73));
         Login_Btn.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -86,11 +99,11 @@ public class Login extends javax.swing.JFrame {
                     .addGroup(login_Bg1Layout.createSequentialGroup()
                         .addGroup(login_Bg1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel2)
-                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(id_field, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(login_Bg1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel3)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 367, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(last_name_field, javax.swing.GroupLayout.PREFERRED_SIZE, 367, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(login_Bg1Layout.createSequentialGroup()
                         .addGap(100, 100, 100)
                         .addComponent(jLabel1)))
@@ -114,11 +127,11 @@ public class Login extends javax.swing.JFrame {
                     .addGroup(login_Bg1Layout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(id_field, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(login_Bg1Layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(last_name_field, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
                 .addComponent(Login_Btn, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -143,6 +156,43 @@ public class Login extends javax.swing.JFrame {
 
     private void Login_BtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Login_BtnActionPerformed
         // TODO add your handling code here:
+        String id_val = id_field.getText();
+        String l_name = last_name_field.getText();
+        
+        if(id_val.isBlank() || l_name.isBlank()) {
+            JOptionPane.showMessageDialog(null, "Student Id and Last name are required!", "Invalid input!", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        int intId = Integer.parseInt(id_val);
+        
+        String query = "SELECT * FROM students WHERE id = ? AND last_name = ?";
+        
+        try (Connection con = dbConn.getConnection();
+             PreparedStatement preparedStmt = con.prepareStatement(query)){
+            preparedStmt.setInt(1, intId);
+            preparedStmt.setString(2, l_name);
+            
+            ResultSet rs = preparedStmt.executeQuery();
+            if(rs.next()) {
+                int id = rs.getInt("id");
+                String first_name = rs.getString("first_name");
+                String middle_name = rs.getString("middle_name");
+                String last_name = rs.getString("last_name");
+                int age = rs.getInt("age");
+                String sex = rs.getString("sex");
+                String birth_date = rs.getString("birth_date");
+                
+                Student student = new Student(id, first_name, middle_name, last_name, age, sex, birth_date);
+                Active_Student.setActiveStudent(student);
+                JOptionPane.showMessageDialog(null, "Login Success", "Logged In", JOptionPane.INFORMATION_MESSAGE);
+                this.dispose();
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
     }//GEN-LAST:event_Login_BtnActionPerformed
 
     private void signup_linkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_signup_linkActionPerformed
@@ -153,11 +203,11 @@ public class Login extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton Login_Btn;
+    private javax.swing.JTextField id_field;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField last_name_field;
     private java_swings.Login_Bg login_Bg1;
     private javax.swing.JButton signup_link;
     // End of variables declaration//GEN-END:variables

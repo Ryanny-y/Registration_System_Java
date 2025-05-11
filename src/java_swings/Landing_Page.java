@@ -135,6 +135,8 @@ public class Landing_Page extends javax.swing.JFrame {
         
         if(active_student == null) {
             new Login();
+        } else {
+            new Registration_Form();
         }
     }//GEN-LAST:event_register_btnActionPerformed
 
