@@ -72,7 +72,7 @@
                   <Component id="course_comboBox" alignment="3" min="-2" pref="37" max="-2" attributes="0"/>
                   <Component id="register_btn" alignment="0" min="-2" pref="35" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="219" max="32767" attributes="0"/>
+              <EmptySpace pref="14" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -360,6 +360,9 @@
         <Property name="borderPainted" type="boolean" value="false"/>
         <Property name="focusable" type="boolean" value="false"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="register_btnActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

@@ -164,12 +164,12 @@ public class Login extends javax.swing.JFrame {
             return;
         }
         
-        int intId = Integer.parseInt(id_val);
-        
         String query = "SELECT * FROM students WHERE id = ? AND last_name = ?";
         
         try (Connection con = dbConn.getConnection();
              PreparedStatement preparedStmt = con.prepareStatement(query)){
+            int intId = Integer.parseInt(id_val);
+
             preparedStmt.setInt(1, intId);
             preparedStmt.setString(2, l_name);
             
@@ -187,12 +187,13 @@ public class Login extends javax.swing.JFrame {
                 Active_Student.setActiveStudent(student);
                 JOptionPane.showMessageDialog(null, "Login Success", "Logged In", JOptionPane.INFORMATION_MESSAGE);
                 this.dispose();
+                new Registration_Form();
             }
         } catch (SQLException ex) {
             Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(null, "Invalid Student Id", "Invalid input", JOptionPane.ERROR_MESSAGE);
         }
-        
-        
     }//GEN-LAST:event_Login_BtnActionPerformed
 
     private void signup_linkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_signup_linkActionPerformed

@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import objects.Course;
 
 /**
@@ -23,21 +24,22 @@ import objects.Course;
  * @author Maku
  */
 public class Registration_Form extends javax.swing.JFrame {
-    
+
     private final DbConnection dbCon = new DbConnection();
 
     public Registration_Form() {
         initComponents();
         getContentPane().setBackground(Color.WHITE);
-
+        
+        setTitle("Registration Form");
         loadStudentInformations();
         loadCourses();
         setVisible(true);
     }
-    
+
     private void loadStudentInformations() {
         Student student = Active_Student.getActiveStudent();
-        
+
         System.out.println(student.getSex());
         student_field.setText(String.valueOf(student.getId()));
         fname_field.setText(student.getFirst_name());
@@ -50,32 +52,32 @@ public class Registration_Form extends javax.swing.JFrame {
 
     private void loadCourses() {
         String query = "SELECT * FROM courses";
-        
+
         ArrayList<Course> course_list = new ArrayList<>();
-        try (Connection con = dbCon.getConnection();
-             Statement stmt = con.createStatement()){
-            
+        try (Connection con = dbCon.getConnection(); Statement stmt = con.createStatement()) {
+
             ResultSet rs = stmt.executeQuery(query);
-            while(rs.next()) {
+            while (rs.next()) {
                 String course_code = rs.getString("course_code");
                 String course_name = rs.getString("course_name");
                 String instructor_name = rs.getString("instructor_name");
                 int credits = rs.getInt("credits");
                 int max_capacity = rs.getInt("max_capacity");
-                
+
                 Course course = new Course(course_code, course_name, instructor_name, credits, max_capacity);
                 course_list.add(course);
             }
-            
-            for(Course course : course_list) {
+
+            for (Course course : course_list) {
                 String course_name = course.getCourse_name();
                 course_comboBox.addItem(course_name);
+                course_comboBox.setSelectedIndex(0);
             }
         } catch (SQLException ex) {
             Logger.getLogger(Registration_Form.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }   
-    
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -253,6 +255,11 @@ public class Registration_Form extends javax.swing.JFrame {
         register_btn.setBorder(null);
         register_btn.setBorderPainted(false);
         register_btn.setFocusable(false);
+        register_btn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                register_btnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -292,12 +299,45 @@ public class Registration_Form extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(course_comboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(register_btn, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(219, Short.MAX_VALUE))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void register_btnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_register_btnActionPerformed
+        String query = "INSERT INTO student_course (student_id, course_code) VALUES (?, ?)";
+        String courseCodeQuery = "SELECT course_code FROM courses WHERE course_name = ?";
+        int student_id = Active_Student.getActiveStudent().getId();
+
+        try (Connection conn = dbCon.getConnection(); 
+             PreparedStatement courseCodePstmt = conn.prepareStatement(courseCodeQuery); 
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            courseCodePstmt.setString(1, course_comboBox.getSelectedItem().toString());
+
+            ResultSet courseRs = courseCodePstmt.executeQuery();
+            if (courseRs.next()) {
+                String course_code = courseRs.getString("course_code");
+                pstmt.setInt(1, student_id);
+                pstmt.setString(2, course_code);
+
+                int intResult = pstmt.executeUpdate();
+                if(intResult > 0) {
+                    JOptionPane.showMessageDialog(null, "Registration Complete!", "Registration Status", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Registration Failed!", "Registration Status", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Course Not FOund", "Not found", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Registration_Form.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }//GEN-LAST:event_register_btnActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
