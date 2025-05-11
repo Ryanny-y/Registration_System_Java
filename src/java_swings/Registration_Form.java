@@ -30,7 +30,7 @@ public class Registration_Form extends javax.swing.JFrame {
     public Registration_Form() {
         initComponents();
         getContentPane().setBackground(Color.WHITE);
-        
+
         setTitle("Registration Form");
         loadStudentInformations();
         loadCourses();
@@ -40,7 +40,6 @@ public class Registration_Form extends javax.swing.JFrame {
     private void loadStudentInformations() {
         Student student = Active_Student.getActiveStudent();
 
-        System.out.println(student.getSex());
         student_field.setText(String.valueOf(student.getId()));
         fname_field.setText(student.getFirst_name());
         mname_field.setText(student.getMiddle_name());
@@ -115,6 +114,11 @@ public class Registration_Form extends javax.swing.JFrame {
         view_courses.setBorder(null);
         view_courses.setBorderPainted(false);
         view_courses.setFocusable(false);
+        view_courses.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                view_coursesActionPerformed(evt);
+            }
+        });
 
         lbl.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         lbl.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -296,9 +300,9 @@ public class Registration_Form extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(student_info, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(course_comboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(register_btn, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(register_btn, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(course_comboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(14, Short.MAX_VALUE))
         );
 
@@ -311,9 +315,7 @@ public class Registration_Form extends javax.swing.JFrame {
         String courseCodeQuery = "SELECT course_code FROM courses WHERE course_name = ?";
         int student_id = Active_Student.getActiveStudent().getId();
 
-        try (Connection conn = dbCon.getConnection(); 
-             PreparedStatement courseCodePstmt = conn.prepareStatement(courseCodeQuery); 
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
+        try (Connection conn = dbCon.getConnection(); PreparedStatement courseCodePstmt = conn.prepareStatement(courseCodeQuery); PreparedStatement pstmt = conn.prepareStatement(query)) {
             courseCodePstmt.setString(1, course_comboBox.getSelectedItem().toString());
 
             ResultSet courseRs = courseCodePstmt.executeQuery();
@@ -322,11 +324,17 @@ public class Registration_Form extends javax.swing.JFrame {
                 pstmt.setInt(1, student_id);
                 pstmt.setString(2, course_code);
 
-                int intResult = pstmt.executeUpdate();
-                if(intResult > 0) {
-                    JOptionPane.showMessageDialog(null, "Registration Complete!", "Registration Status", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(null, "Registration Failed!", "Registration Status", JOptionPane.ERROR_MESSAGE);
+                try {
+                    int intResult = pstmt.executeUpdate();
+                    if (intResult > 0) {
+                        JOptionPane.showMessageDialog(null, "Registration Complete!", "Registration Status", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Registration Failed!", "Registration Status", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, "You already registered in this course.", "Course Status", JOptionPane.WARNING_MESSAGE);
+                return;
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "Course Not FOund", "Not found", JOptionPane.ERROR_MESSAGE);
@@ -338,6 +346,11 @@ public class Registration_Form extends javax.swing.JFrame {
         }
 
     }//GEN-LAST:event_register_btnActionPerformed
+
+    private void view_coursesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_view_coursesActionPerformed
+        // TODO add your handling code here:
+        new ViewCourses();
+    }//GEN-LAST:event_view_coursesActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
