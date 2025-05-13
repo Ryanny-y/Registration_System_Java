@@ -27,13 +27,12 @@ public class Registration_Form extends javax.swing.JFrame {
 
     private final DbConnection dbCon = new DbConnection();
 
-    public Registration_Form() {
+    public Registration_Form(String c_name) {
         initComponents();
         getContentPane().setBackground(Color.WHITE);
-
         setTitle("Registration Form");
         loadStudentInformations();
-        loadCourses();
+        loadCourses(c_name);
         setVisible(true);
     }
 
@@ -49,7 +48,7 @@ public class Registration_Form extends javax.swing.JFrame {
         bdate_field.setText(student.getBirth_date());
     }
 
-    private void loadCourses() {
+    private void loadCourses(String c_name) {
         String query = "SELECT * FROM courses";
 
         ArrayList<Course> course_list = new ArrayList<>();
@@ -70,7 +69,16 @@ public class Registration_Form extends javax.swing.JFrame {
             for (Course course : course_list) {
                 String course_name = course.getCourse_name();
                 course_comboBox.addItem(course_name);
+            }
+            
+            if(c_name.equals("null")) {
                 course_comboBox.setSelectedIndex(0);
+            } else {
+                if(c_name.equals("IT")) {
+                    course_comboBox.setSelectedItem("Information Technology");
+                } else {
+                    course_comboBox.setSelectedItem(c_name);
+                }
             }
         } catch (SQLException ex) {
             Logger.getLogger(Registration_Form.class.getName()).log(Level.SEVERE, null, ex);

@@ -187,7 +187,7 @@ public class Login extends javax.swing.JFrame {
                 Active_Student.setActiveStudent(student);
                 JOptionPane.showMessageDialog(null, "Login Success", "Logged In", JOptionPane.INFORMATION_MESSAGE);
                 this.dispose();
-                new Registration_Form();
+                new Registration_Form("null");
             }
         } catch (SQLException ex) {
             Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);

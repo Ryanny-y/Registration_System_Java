@@ -1,7 +1,7 @@
 package objects;
 
 public class Course {
-    String course_code, course_name, instructor_name;
+    String course_code, course_name, instructor_name, registration_date;
     int credits, max_capacity;
 
     public Course(String course_code, String course_name, String instructor_name, int credits, int max_capacity) {
@@ -11,7 +11,7 @@ public class Course {
         this.credits = credits;
         this.max_capacity = max_capacity;
     }
-
+    
     public String getCourse_code() {
         return course_code;
     }

@@ -33,7 +33,7 @@ public class ViewCourses extends javax.swing.JFrame {
     }
     
     private void loadCourses() {
-        String query = "SELECT courses.* FROM courses INNER JOIN student_course ON courses.course_code = student_course.course_code WHERE student_course.student_id = ?;";
+        String query = "SELECT courses.*, student_course.registration_date FROM courses INNER JOIN student_course ON courses.course_code = student_course.course_code WHERE student_course.student_id = ?;";
         int student_id = Active_Student.getActiveStudent().getId();
         
         try (Connection con = dbCon.getConnection(); PreparedStatement pstmt = con.prepareStatement(query)) {
@@ -45,9 +45,10 @@ public class ViewCourses extends javax.swing.JFrame {
                 String instructor_name = rs.getString("instructor_name");
                 int credits = rs.getInt("credits");
                 int max_capacity = rs.getInt("max_capacity");
+                String registration_date = rs.getString("student_course.registration_date");
 
                 Course course = new Course(course_code, course_name, instructor_name, credits, max_capacity);
-                course_Table1.addRow(new Object[] {course_code, course_name, instructor_name, credits, max_capacity});
+                course_Table1.addRow(new Object[] {course_code, course_name, instructor_name, credits, max_capacity, registration_date});
             }
             
             
@@ -65,6 +66,7 @@ public class ViewCourses extends javax.swing.JFrame {
         course_Table1 = new java_swings.Course_Table();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(850, 323));
         setResizable(false);
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 20)); // NOI18N
@@ -79,11 +81,11 @@ public class ViewCourses extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Course Code", "Course Name", "instructor", "Credits", "Registered At"
+                "Course Code", "Course Name", "instructor", "Credits", "Max Capacity", "Registered At"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, true, false, true, true
+                false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
